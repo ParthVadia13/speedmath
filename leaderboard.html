@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaderboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/dist/umd/supabase.min.js"></script>
+  <style>
+    body { 
+      font-family: "Lucida Console", "Courier New", monospace;
+      color:whitesmoke; 
+      font-size: 1.2vw;
+      padding: 2vw; 
+      background: #111111;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 1em;
+      text-align: center;
+    }
+
+    button {
+      background-color: #3c79da;
+      font-family: "Lucida Console", "Courier New", monospace;
+      color:#111111;
+      border: none;
+      padding: 1.5vw 2.5vw;
+      font-size: 1.2em;
+      cursor: pointer;
+      border-radius: 20px;
+      margin-bottom: 1em;
+      font-size: 1.5vw;
+      font-weight:bold;
+    }
+
+    button:hover {
+      background-color: whitesmoke;
+    }
+
+    table {
+      width: 40%;
+      margin: 0 auto;
+      border-collapse: collapse;
+      margin-top: 1em;
+    }
+
+    td {
+      padding: 20px;
+      text-align: left;
+      border-bottom: 2px solid #ddd;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px;
+      padding-left:20px;
+      background-color: #3c79da;
+    }
+
+    td.place {
+      width: 20%;
+      font-weight: bold;
+    }
+
+    td.name {
+      font-weight:bold;
+      color: #3c79da;
+      width: 50%;
+    }
+  </style>
+</head>
+<body>
+  <button onclick="window.location.href='main.html'">Return to the Game</button>
+  <h1>Global Leaderboard</h1>
+  <table id="leaderboard">
+    <thead>
+      <tr>
+        <th>Place</th>
+        <th>Name</th>
+        <th>High Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="3">Loading...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    const SUPABASE_URL = 'https://deuzysidyvdgzyinqrja.supabase.co'; // Replace with your URL
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRldXp5c2lkeXZkZ3p5aW5xcmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxNjM1MzAsImV4cCI6MjA2MjczOTUzMH0.pjDnNB5PvpzN8rEXjYsxeR6jO9EDpVeyz_8zDlq6L3k"
+    let leaderboard = document.getElementById('leaderboard').getElementsByTagName('tbody')[0];
+
+    
+
+    async function fetchLeaderboard() {
+      try {
+        const result = await window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+          .from('scores')
+          .select('*')
+          .order('score', { ascending: false })
+
+        if (result.error) {
+          leaderboard.innerHTML = '<tr><td colspan="3" style="color:red">Error loading scores</td></tr>';
+          return;
+        }
+
+        const data = result.data;
+        leaderboard.innerHTML = '';
+
+        if (!data || data.length === 0) {
+          leaderboard.innerHTML = '<tr><td colspan="3">No scores yet</td></tr>';
+          return;
+        }
+
+        data.forEach((entry, index) => {
+          const row = document.createElement('tr');
+
+          const placeCell = document.createElement('td');
+          placeCell.textContent = index + 1;
+          placeCell.classList.add('place');
+
+          const nameCell = document.createElement('td');
+          nameCell.textContent = entry.name;
+          nameCell.classList.add('name');
+
+          const scoreCell = document.createElement('td');
+          scoreCell.textContent = entry.score;
+
+          row.appendChild(placeCell);
+          row.appendChild(nameCell);
+          row.appendChild(scoreCell);
+
+          leaderboard.appendChild(row);
+        });
+      } catch (err) {
+        leaderboard.innerHTML = '<tr><td colspan="3" style="color:red">'+err.message+'</td></tr>';
+      }
+    }
+
+    fetchLeaderboard();
+  </script>
+</body>
+</html>
